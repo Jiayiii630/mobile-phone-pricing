@@ -1,0 +1,1542 @@
+---
+title: "The Impact of Mobile Phone Features on Pricing: A Statistical Approach"
+author: "Ang Jia Yi"
+date: "2024-07-10"
+output: 
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: true
+    theme: cerulean
+editor_options:
+  markdown:
+    wrap: 72
+
+---
+
+```{=html}
+<style>
+p {
+    text-align: justify;
+}
+</style>
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+packages <- c('diagram','matlib','optimbase', 'tidyverse','readr','ggplot2','dplyr','ggcorrplot','MASS','olsrr','AICcmodavg','leaps','caTools','car','corrplot','summarytools','gridExtra') 
+new.packages <- packages[!(packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
+
+lapply(packages, require, character.only = TRUE)
+
+```
+
+# Topic Overview
+
+In the rapidly evolving mobile phone market, it is crucial for companies
+to develop competitive and well-priced products to capture different
+market segments. It is found that the mobile phone price and product
+features will influence the consumers’ purchasing intention. Geçit and
+Kayacan (2017) found that mobile phone price has a negative effect on
+the consumers’ mobile phone purchase decision, which as the price
+increases, the intention of consumers to purchase the mobile phone
+decreases. Besides, Manandhar and Timilsina (2023) stated that the
+mobile phone features significantly impact the purchasing decisions of
+consumers, where they further suggested mobile phones companies to
+conduct market research to determine the features demanded by the
+consumers such as camera resolution, a stylish and lighter design, or
+any innovative software and hardware advancement to boost sales.
+However, the pricing of a mobile phone is also often influenced by the
+features it possesses. Hence, a balance is needed to be achieved between
+the features associated with a mobile phone and its price, so that
+consumers have higher intention to purchase it.
+
+To achieve this, predictive modelling can be a valuable tool. By
+analysing historical data on mobile phone features and their
+corresponding prices, we can identify which variables most significantly
+influence pricing. This analysis will help us establish an effective
+pricing model that optimally reflects the attributes of each market
+segment. Key features to consider include weight, thickness, battery
+capacity, screen size, pixels per inch (PPI), rear camera, front camera,
+number of CPU cores, CPU frequency, internal memory, and RAM.
+
+The objective of this project is to develop predictive models using
+various combinations of these features to determine the optimal set of
+variables that best predict mobile phone prices. The insights gained
+will guide the pricing strategy for the new mobile phone series,
+ensuring that each model is competitively priced and aligned with market
+expectations.
+
+<br>
+
+# Problem
+
+## Scenario
+
+As the head of the product development team at a leading mobile phone
+company, you are tasked with launching a new series of mobile phones.
+This series will include models targeting different market segments:
+budget, mid-range, and premium. After some research, it is found that
+apart from mobile phone price, the product features will also influence
+the purchasing decision of consumers (Geçit & Kayacan, 2017; Manandhar &
+Timilsina, 2023). Therefore, to optimize the pricing strategy, you need
+to consider various factors that influence the cost and perceived value
+of the mobile phones. These factors include weight, thickness, battery
+capacity, screen size, pixels per inch (PPI), rear camera, front camera,
+number of CPU cores, CPU frequency, internal memory, and RAM.
+
+## Problem Statement
+
+Develop predictive models using various combinations of features
+(including weight, thickness, battery capacity, screen size, camera
+specifications, CPU performance, internal memory, and RAM) to identify
+which variables have the most significant influence on mobile phone
+pricing. The objective is to determine the optimal combination of
+features that best predicts prices and to establish the most effective
+pricing model for the new mobile phone series across budget, mid-range,
+and premium segments.
+
+<br>
+
+# Data
+
+The dataset used for this analysis is a mobile price prediction dataset,
+sourced from Kaggle (Younesi, 2022). This dataset includes a
+comprehensive set of features related to mobile phone specifications and
+their corresponding prices. The mobile phone specifications include
+weight, thickness, battery capacity, screen resolution, PPI, rear
+camera, front camera, CPU cores, CPU frequency, internal memory, and
+RAM. This makes the dataset an ideal resource for developing predictive
+pricing models. The variable “Sale” has been excluded during data
+extraction, as we are investigating the impact of mobile phone features
+on its price.
+
+During the initial data extraction, we encountered a variable labeled
+"type of CPU cores" However, the data for this variable consisted of
+numerical values ranging from 0 to 8. Upon closer examination, it became
+evident that these numbers more accurately represented the number of CPU
+cores in each mobile phone rather than different types of CPU cores.
+
+To ensure the integrity and usability of our dataset, we decided to
+treat this variable as representing the number of CPU cores.
+Consequently, the variable was renamed to "number of CPU cores" to
+reflect its true nature. Additionally, any entries with a value of 0 for
+the number of CPU cores were treated as missing data. These entries were
+subsequently removed from the dataset to avoid any inaccuracies or
+potential biases in our analysis. This preprocessing step was crucial to
+ensure that the dataset accurately represents the specifications of the
+mobile phones under study.
+
+Furthermore, during our analysis on the data found, we found that the
+data for the resolution is represented by a single number. For example,
+4, 4.7 and 5.5, which is actually describing the screen size of the
+mobile phone in inches rather than the the resolution of the mobile
+phone, which should be represented by two numbers, for example, 1920 x
+1080 pixels and 2560 x 1440 pixels. Hence, we decide to amend the
+variable name from resolution to screen size.
+
+## Data Description
+
+### Weight
+
+Weight is the total mass of a mobile phone, which is significant for
+comfort and long-term usage, with a balance between durability and
+convenience. The weight often correlates with other factors that
+contribute to a mobile phone's cost. For instance, research indicates
+that features like a larger battery or more robust materials, which
+contribute to a phone's weight, can also increase its price due to their
+added value and production costs​ (Mustafa & Al-Rifat, 2019). Hence, the
+new mobile phones’ features should be built within a certain weight that
+does not burden the daily usage of consumers. This could potentially
+influence the production costs and the final price of the mobile phones
+launched.
+
+### Thickness
+
+The thickness of a mobile phone can determine whether its appearance is
+aesthetically and in line with consumers’ perception. Octaviani and
+Rahmawan (2023) found that customer buying interest in iPhone Mini is
+positively and significantly influenced by product design. However,
+usually the mobile phone price increases as its thickness decreases.
+This is due the increase in production costs as it requires more
+advanced engineering and design to maintain the phone performance and
+durability while minimising bulk. The research made by Elsheikh et al.
+(2023) has highlighted that the effort to balance thinness with
+functionality and battery life necessitates costlier, compact components
+and materials, leading to higher prices​. Hence, an optimal thickness of
+the mobile phone is needed to balance between its price and performance.
+
+### Battery
+
+Mobile phone batteries with higher capacity will have longer battery
+life, which is a driving factor of higher mobile phone price. Negi and
+Pandey (2013) discovered that the longest battery backup is the most
+important consideration for young females in Bangladesh when purchasing
+mobile phones. Besides, batteries with advanced technology features such
+as fast charging and wireless charging are also more costly. Shalahb
+Gaur (2019) found that wireless charging technology that is energy
+conversion efficient is costlier. Hence, a battery with better quality
+can increase the phone’s performance and longevity, contributing to
+higher costs. Therefore, the battery brand and technology used would
+also influence the price of the new mobile phones.
+
+### CPU Frequency (CPU_freq)
+
+CPU frequency, measured in gigahertz (GHz), significantly impacts the
+speed at which a device processes data. Higher clock speeds mean that
+the processor can execute tasks more rapidly, enhancing everything from
+simple phone functions to complex application performance. Intel (n.d.)
+notes that within the same CPU generation, processors with greater clock
+speeds usually perform better than those with lower speeds in various
+tasks. As a result, mobile phones with higher CPU frequencies often
+deliver superior performance, which typically leads to higher market
+prices.
+
+### Internal memory (InternalMem)
+
+Internal memory is a key factor in enhancing a mobile phone's usability.
+With more internal storage, a device can accommodate more applications
+and store greater amounts of data, which helps maintain the phone's
+performance over time. As a result, mobile phones with larger storage
+capacities are perceived as more versatile and powerful, justifying
+higher price tags. This is particularly relevant as the size
+requirements for media files and apps grow. For instance, the base model
+of the iPhone 13 with 128GB is priced at \$799, but upgrading to 256GB
+costs an additional \$100, while a jump to 512GB adds another \$400 to
+the price. Thus, fully upgrading the storage capacity can nearly double
+the cost of the iPhone 13 (Bowe, 2021). Clearly, internal storage is not
+just a component—it's a significant investment that reflects and
+enhances a mobile phone's market value.
+
+### RAM
+
+RAM (Random Access Memory) is a crucial element influencing mobile phone
+pricing. Increased RAM capacity enables smoother operation of multiple
+apps at once, essential for high-end gaming and professional
+applications that demand significant memory. As a result, phones with
+greater RAM can handle more tasks efficiently, leading to higher pricing
+due to improved multitasking performance and speed. While the presence
+of more RAM does raise the manufacturing cost of a mobile phone, it is
+considered a standard component. However, it's important to note that
+other hardware components often play a more direct role in determining
+the final price of the phone (ScientiaMobile, 2022).
+
+### Number of CPU cores (CPU_core)
+
+The number of CPU cores is a pivotal factor in determining the
+multitasking capabilities and overall performance of a mobile phone.
+Having more cores allows a phone to process multiple tasks
+simultaneously, enhancing performance in applications that require
+multi-threading and improving overall efficiency in power usage.
+Essentially, the number of cores in a CPU signifies the device's ability
+to handle concurrent tasks; thus, phones equipped with more cores
+typically offer superior multitasking capabilities (Lebara, 2024). This
+increased capacity for multitasking not only boosts the phone's
+usability and responsiveness but also contributes to higher energy
+efficiency. As a result, mobile phones with greater core counts command
+higher prices in the market due to their enhanced performance and
+advanced capabilities.
+
+### Screen Size (ScreenSize)
+
+The screen size of a mobile phone is measured across the screen, from
+one corner to the opposite corner, and defined in inches. It is
+important for business users who frequently need to view two apps at
+once on their phone while multitasking with the multiple window feature
+(Arnold, 2017). The screen size will affect the cost of producing a
+mobile phone (Pakalka & Noreika, n.d.). The higher cost will lead to a
+higher price. Thus, the screen size is the factor that affects the final
+price of a mobile phone.
+
+### Pixels Per Inch (PPI)
+
+Pixels per inch (PPI) is calculated by dividing the diagonal resolution
+of the screen (in pixels) by the diagonal size of the screen (in
+inches). The screen of a mobile phone with a higher PPI will display
+images that are sharper and more detailed. However, it will cost more
+and require longer battery life for a mobile phone’s screen with a
+higher PPI (FasterCapital, 2024). Hence, PPI will affect the final price
+of a mobile phone.
+
+### Rear Camera (RearCam)
+
+Mobile phone technology has advanced far more quickly than that of most
+"proper" cameras because of the substantially larger research and
+development expenditures that are made by technology companies like
+Samsung and Apple (Dawood, 2018). Hence, with the larger capital
+invested in R&D to develop the rear camera, the price of the mobile
+phone will increase along with the development of the camera, and it
+also implies that the development of the number of Megapixels (MP)
+(resolution of a digital image or camera sensor) of the mobile phone
+will influence the final price of the mobile phone.
+
+### Front Camera (FrontCam)
+
+The primary uses of the front camera are "selfies", facial recognition
+and iris scanning for devices (Everphone, n.d.). According to NEC
+(2022), the iPhone 13 was the most expensive mobile phone in 2022 due to
+Apple's introduction of facial recognition technology. The front camera
+with higher Megapixels (MP) will indirectly improve face recognition
+performance. Hence, the improvement in the MP of the front camera will
+affect the price of the mobile phone.
+
+<br>
+
+# Extract and Examine the data
+
+```{r}
+
+# Read dataset
+data_phone <- read.csv("C:/Users/User/Desktop/SUNWAY/Y3S2 REGRESSION ANALYSIS/Cellphone.csv", header=TRUE)
+
+# Look at the structure of the variables
+str(data_phone)
+
+# View the summary of the dataset
+summary(data_phone)
+
+price <- data_phone$Price
+variables <- names(data_phone)[-1]  # Excluding the "Price" column
+
+# Set up the plotting area
+par(mfrow = c(3, 4))  # Adjust the number of rows and columns as needed
+
+# Loop through each variable and plot against Price
+for (variable in variables) {
+  plot(price, data_phone[[variable]], main = paste("Price vs", variable),
+       xlab = "Price", ylab = variable)
+}
+
+# Reset the plotting area to default
+par(mfrow = c(1, 1))
+
+```
+
+## Scatter plot analysis
+
+-   **Price vs Screen Size and Price vs Weight:** There is no
+    discernible trend, suggesting that the weight of a phone and the
+    screen size does not have a significant impact on its price.
+
+-   **Price vs PPI:** The plot displays a positive trend, indicating
+    that higher pixel density could contribute to higher prices,
+    reflecting consumer preferences for better display quality.
+
+-   **Price vs CPU Core and Price vs CPU Frequency:** The plots show
+    that higher numbers of CPU cores and higher CPU frequencies tend to
+    be associated with higher-priced phones, emphasizing the value
+    placed on processing power.
+
+-   **Price vs Internal Memory and Price vs RAM:** Both attributes show
+    a positive relationship with price, which means phones with more
+    memory and RAM are generally priced higher, likely due to better
+    performance capabilities.
+
+-   **Price vs Rear Camera and Price vs Front Camera:** The plots show
+    some level of positive relationship, especially with higher
+    specifications of rear cameras, suggesting that better camera
+    quality may influence the price, though the relationship is not as
+    strong as it is with internal memory or CPU specs.
+
+-   **Price vs Battery:** There's a slight positive relationship,
+    indicating that phones with larger battery capacities tend to have
+    higher prices, likely due to the longer usage they offer.
+
+-   **Price vs Thickness:** This plot reveals a moderate negative trend,
+    suggesting a possible consumer preference for thinner devices, which
+    might be associated with higher prices.
+
+The scatter plots collectively examine the relationship between various
+technical specifications of mobile phones and their market prices.
+Generally, performance-related specifications such as **CPU frequency,
+internal memory, and RAM** show a clear positive correlation with price,
+suggesting that higher performance metrics are associated with
+higher-priced models, reflecting consumer demand for more powerful
+devices. Similarly, features that enhance user experience, namely
+**battery capacity**, also tend to increase with price, indicating a
+market preference for longer battery life. Interestingly, **camera
+specifications, both rear and front**, show a more moderate impact on
+pricing, suggesting that while important, they may not be the primary
+driver of price differences. Conversely, the **thickness** of phones
+shows a moderate negative relationship with price, hinting at a premium
+on sleeker, thinner designs. Overall, these plots underscore the
+multifaceted factors that contribute to the pricing of mobile devices,
+with a strong emphasis on performance and user experience enhancements.
+
+<br>
+
+# Correlation Matrix
+
+```{r}
+
+# Calculate the correlation matrix for the data_phone dataset and round the values to 4 decimal places
+rounded_correlation_matrix <- round(cor(data_phone), 4)
+rounded_correlation_matrix
+
+# Plot the correlation matrix using the corrplot package, displaying only the lower triangular part of the matrix
+corrplot::corrplot(rounded_correlation_matrix, type = 'lower')
+
+```
+
+## Interpretation
+
+**Very Strong Positive Correlation:**
+
+-   **RAM and Price (0.8922):** A very strong positive correlation
+    exists between RAM and price, demonstrating that higher RAM
+    significantly increases mobile phone prices. This correlation is the
+    strongest among all the predictors, indicating RAM as a crucial
+    pricing factor.
+
+**Strong Positive Correlation:**
+
+-   **Internal Memory and Price (0.7920):** A strong positive
+    correlation suggests that mobile phones with larger internal memory
+    command higher prices, emphasizing the importance of storage
+    capacity in price determination.
+-   **PPI and Price (0.7877):** A strong positive correlation indicates
+    that higher PPI, enhancing screen sharpness, tends to increase the
+    mobile phone's price significantly.
+-   **Rear Camera and Price (0.6787):** A strong positive correlation
+    between rear camera quality and price reflects consumer demand for
+    high-quality photography capabilities.
+-   **Front Camera and Price (0.6500):** Strong positive correlation
+    shows that superior front camera quality, crucial for selfies and
+    video calls, can drive up mobile phone prices.
+
+**Moderate Positive Correlation:**
+
+-   **CPU Frequency and Price (0.6079):** Higher CPU frequencies,
+    enhancing processing speed, correlate moderately with higher mobile
+    phone prices.
+-   **CPU Core and Price (0.5770):** The number of CPU cores, which
+    facilitates multitasking, shows a moderate positive correlation with
+    price.
+-   **Battery and Price (0.4679):** Larger battery capacities, offering
+    extended usage, are moderately associated with higher prices.
+
+**Weak Positive Correlation:**
+
+-   **Screen Size and Price (0.1850):** A weak positive correlation
+    indicates that larger screen sizes may slightly influence the price,
+    though they are not a primary price determinant.
+
+**Very Weak Positive Correlation**
+
+-   **Weight and Price (0.0338):** A negligible positive correlation
+    suggests that weight has minimal impact on the price of mobile
+    phones.
+
+**Negative Correlation:**
+
+-   **Thickness and Price (-0.6194):** A strong negative correlation
+    shows that thinner mobile phones are generally more expensive,
+    reflecting the higher costs associated with their design and
+    production.
+
+<br>
+
+# Fit the model
+
+## Full Model
+
+```{r}
+
+# Fit a linear regression model to predict Price using all variables in data_phone
+full_model <- lm(Price ~ ., data = data_phone)
+
+# Display a summary of the full_model
+summary(full_model)
+
+```
+
+**Model Performance:**
+
+-   **Residual standard error:** 173.7 on 139 degrees of freedom
+-   **Multiple R-squared:** 0.9401
+    -   Indicates that 94.01% of the variance in price is explained by
+        the model.
+-   **Adjusted R-squared:** 0.9354
+    -   Adjusted for the number of predictors, still indicating a very
+        good fit.
+-   **F-statistic:** 198.5 on 11 and 139 DF, p \< 2.2e-16
+    -   Overall model is highly significant.
+
+**Significance Summary:**
+
+We can observe the significance of each coefficients from the summary
+above:
+
+-   **Significant Positive Predictors:** PPI, CPU Core, CPU Frequency,
+    Internal Memory, RAM, Battery
+-   **Significant Negative Predictors:** Screen Size, Thickness
+-   **Non-significant Predictors:** Weight, Rear Camera, Front Camera
+
+These results suggest that higher PPI, more CPU cores, higher CPU
+frequency, more internal memory, more RAM, and larger battery capacity
+are associated with higher mobile phone prices. In contrast, larger
+screen size and greater thickness are associated with lower prices.
+Weight, rear camera, and front camera do not have significant effects on
+the price.
+
+**Conclusion:**
+
+The analysis demonstrates that multiple factors, including PPI, CPU core
+count, CPU frequency, internal memory, RAM, and battery capacity,
+strongly influence mobile phone prices. The significant F-statistic and
+a high R-squared value (0.9401) confirm that these predictors
+collectively offer a reliable basis for forecasting mobile phone prices.
+This model effectively explains 94.01% of the variability in price,
+underscoring the importance of processing power, memory capacity, and
+battery life in determining phone costs. However, to account for the
+remaining 6% of variability in price, further analysis might explore
+additional variables or external market factors.
+
+<br>
+
+## Fit some smaller models
+
+### Model 1
+
+This model investigates the relationship between the Price of a mobile
+phone and its RAM.
+
+```{r}
+
+# Fit a linear regression model to predict Price using RAM as the predictor
+model1 <- lm(Price ~ RAM, data = data_phone)
+
+# Display a summary of the model1
+summary(model1)
+
+```
+
+**Coefficients:**
+
+-   **Intercept (1396.61):** This is the estimated price when RAM is
+    zero, highly significant (p \< 0.001). This value is the baseline
+    price without considering the RAM effect.
+-   **RAM (391.24):** This coefficient represents the expected change in
+    price for each additional unit of RAM. It indicates a highly
+    significant (p \< 0.001) positive relationship between RAM and
+    price. Specifically, for each 1 GB increase in RAM, the price is
+    expected to increase by approximately 391.24 units.
+
+**Model Performance:**
+
+-   **Residual standard error:** 309.8 on 149 degrees of freedom
+    -   This error term indicates the average difference between the
+        observed values and the model's predictions, suggesting moderate
+        variability around the predicted values.
+-   **Multiple R-squared:** 0.796
+    -   This statistic means that approximately 79.6% of the variability
+        in mobile phone price is explained by the RAM alone, which is a
+        strong fit for such a simple model.
+-   **Adjusted R-squared:** 0.7946
+    -   Adjusting for the number of predictors, the model still explains
+        roughly 79.46% of the variance, reinforcing the effectiveness of
+        RAM in predicting price.
+-   **F-statistic:** 581.4 on 1 and 149 degrees of freedom, with a
+    p-value \< 2.2e-16
+    -   This highly significant F-statistic indicates that the model is
+        statistically significant, meaning RAM is a crucial predictor of
+        mobile phone price.
+
+**Conclusion:**
+
+The analysis shows a strong positive relationship between the amount of
+RAM in a mobile phone and its price. The significant F-statistic and
+high R-squared value confirm that RAM is an excellent predictor of price
+in this dataset. This model is reliable for predicting mobile phone
+prices based on RAM but may benefit from considering other variables to
+account for the remaining 20% of variability in price.
+
+<br>
+
+### Model 2
+
+This model investigates the relationship between the price of a mobile
+phone and its thickness.
+
+```{r}
+
+# Fit a linear regression model to predict Price using Thickness as the predictor
+model2 <- lm(Price ~ Thickness, data = data_phone)
+
+# Display a summary of model2
+summary(model2)
+
+```
+
+**Coefficients:**
+
+-   **Intercept (4633.25):** This is the estimated price when thickness
+    is zero, highly significant (p \< 0.001). This value serves as the
+    baseline price assuming the absence of the thickness variable.
+-   **Thickness (-271.43):** This coefficient represents the expected
+    change in price for each one-unit increase in thickness. The
+    negative value (-271.43) is highly significant (p \< 0.001),
+    indicating that an increase in thickness tends to decrease the
+    mobile phone's price. This matches the intuitive notion that sleeker
+    (thinner) phones might be priced higher due to consumer preferences
+    or manufacturing costs.
+
+**Model Performance:**
+
+-   **Residual standard error:** 538.4 on 149 degrees of freedom
+    -   This error term reflects the average deviation of the observed
+        prices from the predicted values, indicating a somewhat high
+        variability.
+-   **Multiple R-squared:** 0.3836
+    -   This value suggests that approximately 38.36% of the variability
+        in mobile phone price is explained by the thickness alone. This
+        indicates a moderate explanatory power of the model.
+-   **Adjusted R-squared:** 0.3795
+    -   This adjusted metric accounts for the number of predictors (one
+        in this case) and suggests a similar explanatory power after
+        adjustment.
+-   **F-statistic:** 92.73 on 1 and 149 degrees of freedom, with a
+    p-value \< 2.2e-16
+    -   The highly significant F-statistic confirms that the model is
+        statistically significant, indicating that thickness is a
+        crucial factor affecting the price of mobile phones, albeit not
+        the only one given the R-squared value.
+
+**Conclusion:**
+
+The analysis shows a strong negative relationship between the thickness
+of a mobile phone and its price, with thinner phones generally
+commanding higher prices. While the model's fit is moderate, indicating
+that other factors also play significant roles in pricing, thickness
+alone has a clear and statistically significant impact on price.
+
+<br>
+
+### Model 3
+
+This model includes both RAM and thickness as predictors for Price.
+
+```{r}
+
+# Fit a linear regression model to predict Price using RAM and Thickness as predictors
+model3 <- lm(Price ~ RAM + Thickness, data = data_phone)
+
+# Display a summary of model3
+summary(model3)
+
+```
+
+**Coefficients:**
+
+-   **Intercept (2567.08):** This is the baseline price when both RAM
+    and thickness are zero. It is highly significant (p \< 0.001),
+    suggesting a strong baseline influence on price.
+-   **RAM (337.08):** The coefficient for RAM is highly significant (p
+    \< 0.001) and positive, indicating that each unit increase in RAM
+    (likely measured in GB) is associated with an increase in price by
+    about 337.08 units. This result corroborates the known influence of
+    RAM on enhancing device performance and consequently its price.
+-   **Thickness (-122.17):** The coefficient for thickness is also
+    highly significant (p \< 0.001) but negative, indicating that each
+    unit increase in thickness is associated with a decrease in price by
+    about 122.17 units. This may reflect market preferences for thinner
+    devices, which are often considered more modern and portable.
+
+**Model Performance:**
+
+-   **Residual standard error:** 258.9 on 148 degrees of freedom
+    -   Indicates the average deviation of the observed prices from
+        those predicted by the model, suggesting moderate variability
+        around the predicted values.
+-   **Multiple R-squared:** 0.8585
+    -   This statistic means that approximately 85.85% of the
+        variability in mobile phone price is explained by the model,
+        which is quite high, indicating a strong fit.
+-   **Adjusted R-squared:** 0.8566
+    -   Adjusting for the number of predictors (two in this case), the
+        model still explains about 85.66% of the variance, reinforcing
+        the effectiveness of RAM and thickness in predicting price.
+-   **F-statistic:** 448.8 on 2 and 148 degrees of freedom, with a
+    p-value \< 2.2e-16
+    -   This highly significant F-statistic indicates that the model
+        overall is statistically significant, meaning both RAM and
+        thickness are crucial predictors of mobile phone price.
+
+**Conclusion:**
+
+Model 3 demonstrates a strong ability to predict mobile phone prices
+based on RAM and thickness. The positive effect of RAM and the negative
+effect of thickness are both statistically significant and substantial.
+The high R-squared values suggest that including these two predictors
+provides a robust model for explaining price variability, although some
+outliers and extreme values indicate potential limits to the model's
+applicability across all observations.
+
+<br>
+
+## Calculate VIF
+
+VIF measures how much the variance of a regression coefficient is
+inflated due to multicollinearity with other predictors in the model. -
+**VIF = 1:** No multicollinearity (each predictor is not correlated with
+others). - **1 \< VIF \< 5:** Moderate multicollinearity (acceptable
+levels). - **VIF \> 5:** High multicollinearity (problematic, requires
+attention). - **VIF \> 10:** Very high multicollinearity (often
+considered unacceptable)
+
+```{r}
+
+# Calculate VIF values for the full_model
+vif_values <- vif(full_model)
+
+# Create a horizontal bar plot of VIF values
+barplot(vif_values, main = "VIF Values", horiz = TRUE, col = "steelblue", las = 1, cex.names = 0.6)
+
+# Add a vertical dashed line at VIF = 5
+abline(v = 5, lwd = 3, lty = 2)
+
+```
+
+**Summary**
+
+-   **High Multicollinearity:**
+    -   **Weight** and **Screen Size** exhibit very high VIF values,
+        which could seriously affect the reliability of the regression
+        coefficients associated with these predictors.
+-   **Moderate Multicollinearity:**
+    -   **Battery, RAM**, and **Internal Memory** are above the VIF
+        threshold of 5, suggesting these factors also contribute to
+        multicollinearity, albeit not as severely as Weight and
+        Resolution.
+-   **Low Multicollinearity:**
+    -   **Thickness, Front Camera, Rear Camera, CPU Frequency, CPU
+        Core**, and **PPI** have VIF values below 5, indicating that
+        multicollinearity is less of a concern for these variables.
+
+<br>
+
+### Model 4
+
+From the VIF results above, we can thus derive a model.This model
+predicts price using all other variables in the dataset except for
+battery, RAM, internal memory, screen size, and weight due to their high
+VIF values.
+
+```{r}
+
+# Fit a linear regression model to predict Price according to the VIF approach
+model4 <- lm(Price ~ . -Battery -RAM -InternalMem -ScreenSize -Weight, data = data_phone)
+
+# Display a summary of model4
+summary(model4)
+
+```
+
+**Model Performance:**
+
+-   **Residual Standard Error:** 304.2 on 144 degrees of freedom
+    -   Reflects the average size of the residuals.
+-   **Multiple R-squared:** 0.8098
+    -   Approximately 80.98% of the variability in phone price is
+        explained by the model, which is quite high.
+-   **Adjusted R-squared:** 0.8019
+    -   Adjusts the R-squared for the number of predictors used, still
+        indicating a strong model.
+-   **F-statistic:** 102.2 on 6 and 144 DF, with a p-value \< 2.2e-16
+    -   The model is statistically significant, meaning the predictors
+        collectively influence the phone price significantly.
+
+**Significance Summary:**
+
+We can observe the significance of each coefficients from the summary
+above:
+
+-   **Significant Positive Predictors:** PPI, CPU Core, CPU Frequency,
+    Front Camera
+-   **Significant Negative Predictors:** Thickness
+-   **Non-significant Predictors:** Rear Camera
+
+**Conclusion:**
+
+This model effectively explains a substantial portion of the variability
+in phone prices based on several key features, despite excluding
+variables prone to multicollinearity. The significant predictors like
+PPI, CPU frequency, front camera, and thickness have clear associations
+with price, confirming their importance in determining mobile phone
+pricing. The model's overall fit is robust, but careful attention might
+be needed for potential outliers or unusual data points suggested by the
+spread in residuals.
+
+<br>
+
+## Best Subset Selection using BIC
+
+Best subset selection using BIC evaluates all possible combinations of
+predictors and selects the model that minimises the Bayesian Information
+Criterion (BIC), balancing fit and complexity. BIC penalises the
+inclusion of additional predictors to avoid overfitting, ensuring the
+selected model is both accurate and interpretable. This method
+identifies the most significant predictors, optimising the model's
+explanatory power while maintaining simplicity.
+
+```{r}
+
+# Perform subset selection with up to 12 predictors and 2 best models for each subset size
+subset_model <- regsubsets(Price ~ ., data = data_phone, nbest = 2, nvmax = 12)
+
+# Display a summary of the subset selection results
+summary(subset_model)
+
+# Plot the results of the subset selection
+plot(subset_model)
+
+```
+
+**From the Chart:**
+
+-   **Shades of Gray:** The shades of gray indicate the BIC values, with
+    darker shades representing lower (better) BIC values. Lighter shades
+    represent higher BIC values, suggesting less optimal models
+    according to the criterion.
+-   **Predictor Inclusion:** Each filled block in the chart indicates
+    that the predictor (column) is included in the model (row). The
+    absence of a block means the predictor is not included in that
+    particular model.
+
+The best subset selection chart using BIC provides a visual
+representation of the most effective combinations of predictors for
+different model sizes. By examining the chart, we can identify that the
+optimal model includes the predictors: PPI, CPU_core, CPU_freq,
+InternalMem, Ram, ScreenSize, Battery, and Thickness. This optimal model
+is indicated by the row with the lowest BIC value, suggesting it offers
+the best balance between model fit and complexity. Predictors like PPI
+and CPU_core appear consistently in the best models across different
+sizes, highlighting their significant role in predicting the price of
+mobile phones. The chart demonstrates that while adding more predictors
+generally improves the model up to a point, including too many
+predictors can lead to overfitting, as indicated by increasing BIC
+values. Therefore, the identified optimal model provides robust and
+interpretable predictions, balancing the need for accuracy with the
+simplicity of the model.
+
+<br>
+
+### Model 5
+
+From the BIC results above, we can thus derive a model. This model
+predicts the price based on all available variables except for weight,
+rear camera, and front camera. These variables were likely excluded
+based on previous BIC results to optimise the model.
+
+```{r}
+
+# Fit a linear regression model to predict Price according to the results of the BIC approach
+model5 <- lm(Price ~ . -Weight -RearCam -FrontCam, data = data_phone)
+
+# Display a summary of model5
+summary(model5)
+
+```
+
+**Model Performance:**
+
+-   **Residual standard error:** 173.7 on 142 degrees of freedom
+    -   Indicates variability around the fitted values, with a
+        reasonably low error suggesting good model fit.
+-   **Multiple R-squared:** 0.9388
+    -   About 93.88% of the variability in phone prices is explained by
+        this model, which is very high, showing excellent explanatory
+        power.
+-   **Adjusted R-squared:** 0.9354
+    -   Adjusts the R-squared for the number of predictors, still
+        indicating a strong fit.
+-   **F-statistic:** 272.5 on 8 and 142 DF, p-value: \< 2.2e-16
+    -   The overall model fit is statistically significant, suggesting
+        that the predictors collectively have a significant effect on
+        phone prices.
+
+**Significance Summary:**
+
+We can observe the significance of each coefficients from the summary
+above:
+
+-   **Significant Positive Predictors:** PPI, CPU Core, CPU Frequency,
+    Internal Memory, RAM, Battery
+-   **Significant Negative Predictors:** Screen Size, Thickness
+
+**Conclusion:**
+
+Model 5 effectively captures the relationship between various phone
+characteristics and their prices with a high degree of explanatory
+power. Key performance specifications like PPI, CPU specifications, RAM,
+and design aspects like thickness are significant drivers of price. This
+model, streamlined by BIC selection, focuses on the most impactful
+predictors without overfitting, providing valuable insights for
+strategic pricing and product development.
+
+<br>
+
+## Stepwise Regression Methods
+
+Stepwise regression methods are statistical techniques used to select
+the most significant variables in a regression model which involve
+adding or removing predictors based on certain criteria in order to
+improve the model's performance while avoiding overfitting. Before
+proceeding with the stepwise regression methods, let’s generalise the
+linear models (full model, model 1, model 2, model 3, model 4, model 5)
+first.
+
+### Full Model
+
+```{r}
+
+# Fit a generalized linear model to predict Price using all variables in data_phone
+fullmodel <- glm(Price ~ ., data = data_phone)
+
+# Display a summary of the fullmodel
+summary(fullmodel)
+
+```
+
+The full model, which is with all the predictors, has been generalised.
+The value of Akaike Information Criterion (AIC) is 1999.6. It is hard to
+say this is the best as comparison is needed to compute which model is
+with the lowest AIC. AIC is a measure used to determine the model's
+quality where the goodness of fit and the number of parameters used are
+considered. Therefore, lower AIC values indicate a better model.
+
+<br>
+
+### Null Model
+
+```{r}
+
+# Fit a null model (intercept-only model) to predict Price
+nullmodel <- glm(Price ~ 1, data = data_phone)
+
+# Display a summary of the null model
+summary(nullmodel)
+
+```
+
+The null model, which is with the intercept only, has been generalised.
+The value of AIC is 2402.7. This shows that the full model is a better
+model for now in terms of value of AIC.
+
+<br>
+
+### Model 1
+
+```{r}
+
+# Convert model1 to a generalized linear model
+model_1 <- glm(model1)
+
+# Display a summary of model_1
+summary(model_1)
+
+```
+
+Model 1 has been generalised. The value of AIC is 2164.7. This shows
+that the full model is the best model for now in terms of value of AIC.
+
+<br>
+
+### Model 2
+
+```{r}
+# Convert model2 to a generalized linear model
+model_2 <- glm(model2)
+
+# Display a summary of model_2
+summary(model_2)
+
+```
+
+Model 2 has been generalised. The value of AIC is 2331.7. This shows
+that the full model still is the best for now in terms of value of AIC.
+
+<br>
+
+### Model 3
+
+```{r}
+
+# Convert model3 to a generalized linear model
+model_3 <- glm(model3)
+
+# Display a summary of model_3
+summary(model_3)
+
+```
+
+Model 3 has been generalised. The value of AIC is 2111.5. This shows
+that the full model still is the best for now in terms of value of AIC.
+
+<br>
+
+### Model 4
+
+```{r}
+
+# Convert model4 to a generalized linear model
+model_4 <- glm(model4)
+
+# Display a summary of model_4
+summary(model_4)
+
+```
+
+Model 4 has been generalised. The value of AIC is 2164.1. This shows
+that the full model still is the best for now in terms of value of AIC.
+
+<br>
+
+### Model 5
+
+```{r}
+
+# Convert model5 to a generalized linear model
+model_5 <- glm(model5)
+
+# Display a summary of model_5
+summary(model_5)
+
+```
+
+Model 5 has been generalised. The value of AIC is 1996.8. This shows
+that the model is the best for now in terms of value of AIC.
+
+<br>
+
+### Perform stepwise regression model
+
+This method combines forward and backward stepwise regression. It begins
+with an empty model (null model) and adds predictors one by one, similar
+to forward stepwise regression. After adding a predictor, the model
+checks if any of the included predictors can be removed without
+significantly affecting the model fit. This iterative process of adding
+and removing predictors continues until no further improvements can be
+made.
+
+```{r}
+
+# Perform stepwise model selection from nullmodel to fullmodel in both directions
+model.step <- step(nullmodel, scope=list(lower = nullmodel,
+                                         upper = fullmodel,
+                                         direction = "both"))
+
+# Display a summary of the selected model
+summary(model.step)
+
+```
+
+**Analysis:**
+
+The stepwise regression model has performed. The value of AIC is 1996.3.
+By this method, the predictors advised to consider are RAM, CPU_core,
+PPI, Thickness, InternalMem, CPU_freq, Battery, ScreenSize, FrontCam.
+
+<br>
+
+### Perform Forward Stepwise
+
+This method begins with an empty model (null model) and adds predictors
+one by one. At each step, a predictor is added based on criteria such as
+AIC, BIC, or p-value to improve model fit. This process of adding
+predictors continues iterate until no further improvements can be made.
+
+```{r}
+
+# Perform forward stepwise model selection from nullmodel to fullmodel
+forward.model <- step(nullmodel, scope=list(lower=nullmodel,
+                                            upper=fullmodel,
+                                            direction = "forward"))
+
+# Display a summary of the selected model
+summary(forward.model)
+
+```
+
+**Analysis:**
+
+The forward stepwise performed. The value of AIC is 1996.3. By this
+method, the predictors advised to consider are RAM, CPU_core, PPI,
+Thickness, InternalMem, CPU_freq, Battery, ScreenSize, FrontCam.
+Surprisingly, the value of AIC and predictors to take is the same as the
+stepwise regression model.
+
+<br>
+
+### Perform Backward Stepwise
+
+This method starts with the full model (full model) and removes the
+least important predictors one by one. At each step, a predictor is
+removed based on its p-value to improve model fit. This process of
+removing predictors continues iterate until no further improvements can
+be made.
+
+```{r}
+
+# Perform backward stepwise model selection from fullmodel
+backward.model <- step(fullmodel, scope=list(fullmodel, direction = "backward"))
+
+# Display a summary of the selected model
+summary(backward.model)
+
+```
+
+**Analysis:**
+
+The backward stepwise performed. The value of AIC is 1996.3. By this
+method, the predictors advised to consider are RAM, CPU_core, PPI,
+Thickness, InternalMem, CPU_freq, Battery, ScreenSize, FrontCam.
+Surprisingly, the value of AIC and predictors to take is the same as
+both stepwise methods above.
+
+<br>
+
+### Model 6
+
+After performing the stepwise models above, they concluded to have the
+same model. Therefore, model6 is defined with the predictors: RAM,
+CPU_core, PPI, Thickness, InternalMem, CPU_freq, Battery, ScreenSize,
+FrontCam.
+
+```{r}
+
+# Fit a linear regression model to predict Price according to the results of the stepwise regression model approach
+model6 <- lm(Price ~ ScreenSize + PPI + CPU_core + CPU_freq + 
+    InternalMem + RAM + FrontCam + Battery + Thickness, data = data_phone)
+
+# Display a summary of model6
+summary(model6)
+
+```
+
+**Model Performance:**
+
+-   **Residual standard error:** 172.9 on 141 degrees of freedom
+    -   Indicates variability around the fitted values, with a
+        reasonably low error suggesting good model fit.
+-   **Multiple R-squared:** 0.9398
+    -   About 93.98% of the variability in phone prices is explained by
+        this model, which is very high, showing excellent explanatory
+        power.
+-   **Adjusted R-squared:** 0.936
+    -   Adjusts the R-squared for the number of predictors, still
+        indicating a strong fit.
+-   **F-statistic:** 244.8 on 9 and 141 DF, p-value: \< 2.2e-16
+    -   The overall model fit is statistically significant, suggesting
+        that the predictors collectively have a significant effect on
+        phone prices.
+
+**Significance Summary:**
+
+We can observe the significance of each coefficients from the summary
+above:
+
+-   **Significant Positive Predictors:** PPI, CPU Core, CPU Frequency,
+    Internal Memory, RAM, Battery
+-   **Significant Negative Predictors:** Screen Size, Thickness
+-   **Non-significant Predictors:** Front Camera
+
+**Conclusion:**
+
+Model 6 demonstrates a robust fit, explaining about 93.98% of the
+variability in phone prices, as indicated by the high R-squared value.
+Key features such as PPI, CPU core, CPU frequency, internal memory, RAM,
+and battery significantly influence price positively. In contrast,
+screen size and thickness have a negative impact on price. The low
+residual standard error suggests accurate predictions, and the overall
+model is statistically significant, confirming the predictors'
+collective effect on phone prices.
+
+<br>
+
+# Calculate Mallows' C$p$
+
+Mallows’ C$p$ statistics act as a criteria to evaluate model fits when
+comparing models with different numbers of parameters.
+
+```{r}
+
+# Calculate Mallows' Cp for all the models, rounding to 4 decimal places
+mallows_cp <- c(round(ols_mallows_cp(full_model,full_model),4),
+                round(ols_mallows_cp(model1,full_model),4),
+                round(ols_mallows_cp(model2,full_model),4),
+                round(ols_mallows_cp(model3,full_model),4),
+                round(ols_mallows_cp(model4,full_model),4),
+                round(ols_mallows_cp(model5,full_model),4),
+                round(ols_mallows_cp(model6,full_model),4))
+
+# Display the calculated Mallows' Cp values
+mallows_cp
+
+```
+
+The Mallows’ C$p$ for all six models are calculated. We can observed
+that Model 6 has the lowest Mallows’ C$p$ value of 8.6945.
+
+<br>
+
+# Model Selection
+
+```{r}
+
+# Calculate R-squared values for all the models, rounding to 4 decimal places
+r <- c(round(summary(full_model)$r.squared,4),
+       round(summary(model1)$r.squared,4),
+       round(summary(model2)$r.squared,4),
+       round(summary(model3)$r.squared,4),
+       round(summary(model4)$r.squared,4),
+       round(summary(model5)$r.squared,4),
+       round(summary(model6)$r.squared,4))
+
+# Calculate Adjusted R-squared values for all the models, rounding to 4 decimal places
+adj.r <- c(round(summary(full_model)$adj.r.squared,4),
+           round(summary(model1)$adj.r.squared,4),
+           round(summary(model2)$adj.r.squared,4),
+           round(summary(model3)$adj.r.squared,4),
+           round(summary(model4)$adj.r.squared,4),
+           round(summary(model5)$adj.r.squared,4),
+           round(summary(model6)$adj.r.squared,4))
+
+# Define model names for the summary
+mod.names <- c("Full Model", "Model 1", "Model 2", "Model 3", "Model 4", "Model 5", "Model 6")
+
+# Create a data frame summarizing model names, R-squared, Adjusted R-squared, and Mallows' Cp values
+summary_r <- data.frame(
+  Model = mod.names,
+  R_Squared = r,
+  Adjusted_R_Squared = adj.r,
+  Mallows_Cp = mallows_cp
+)
+
+# Create a list of models to be compared
+models <- list(full_model, model1, model2, model3, model4, model5, model6)
+
+# Calculate AIC values for the candidate models
+aic <- aictab(cand.set = models, modnames = mod.names)
+
+# Merge the summary data frame with the AIC results by model names
+slc.model <- merge(summary_r, aic, by.x = "Model", by.y = "Modnames")
+
+# Sort the merged data frame by R-squared values in descending order
+slc.model <- slc.model[order(-slc.model$R_Squared),]
+
+# Display the sorted model comparison table
+slc.model
+
+```
+
+To select the best model, a few criteria should be considered:
+
+1.  **R-Squared:** From the table above, the Full Model, Model 6 and
+    Model 5 have a very similar R-Squared value which is 0.9401, 0.9398,
+    0.9388 respectively. This indicates that these models are having a
+    similar proportion of the variance in the dependent variables.
+    Therefore, Full Model and Model 6 are more preferable in terms of
+    this criterion
+
+2.  **Adjusted R-Squared:** Model 6 has the highest Adjusted R-Squared
+    (0.9360). Although Full Model (0.9354) and Model 5 (0.9354) just
+    slightly lower compared to Model 6 in terms of the Adjusted
+    R-Squared. This shows that Model 6 provides a slightly better fit
+    when considering the number of predictors. Therefore, Model 6 is
+    preferred in terms of this criterion.
+
+3.  **Mallows C**$p$: Model 6 has the lowest Mallows C$p$ (8.6945) as
+    compared to Full Model (12.0000) and Model 5 (9.0228). A lower C$p$
+    value and closer to the number of predictors (K) will indicates a
+    better model. In terms of this criterion, Model 5 is preferred.
+
+4.  **Number of Predictors (K):** Full Model uses 13 predictors, Model 6
+    uses 11 predictors, while Model 5 uses 10 predictors. Model 6 and
+    Model 5 will be considerate as fewer predictors will be preferable
+    if the model fit is similar because it reduces the complexity and
+    risk of over fitting.
+
+5.  **AICc (Akaike Information Criterion corrected):** A lower value of
+    AICc indicate a better model as AICc is a measure of the relative
+    quality of a model. This shows that Model 6 is the most preferable
+    model in terms of this criterion as Model 6's AICc is the lowest
+    among the models which is 1998.216. But Model 5 still can be under
+    considerate as the Model 5's AICc (1998.364) is just slightly higher
+    than Model 6.
+
+**Conclusion**
+
+**Based on the criteria above, Model 6 can be concluded as the best
+model to use**, given the slight differences in R-Squared and Adjusted
+R-Squared, and considering that Model 6 has a lower Mallows C$p$, uses
+fewer predictors, and has the lowest AICc. Through these, Model 6
+provides the most comparable fit among the models but with less
+complexity and better overall performance as indicated by the lower
+Mallows's C$p$ and AICc values.
+
+<br>
+
+## Best Model
+
+After the selection of models, the best model is model 6.
+
+```{r}
+
+# Assign model6 as the best model
+best_model <- model6
+
+```
+
+<br>
+
+# Standardized Residuals and Studentized Residuals
+
+```{r}
+
+# Calculate standard residuals from the best model
+standardresidual <- rstandard(best_model)
+dfstandardresidual <- data.frame(standardresidual)
+
+# Calculate studentized residuals from the best model
+studentizedresidual <- studres(best_model)
+dfstudentizedresidual <- data.frame(studentizedresidual)
+
+# Add an index column for plotting
+dfstandardresidual$x <- seq(1:nrow(dfstandardresidual))
+dfstudentizedresidual$x <- seq(1:nrow(dfstudentizedresidual))
+
+# Plot a histogram of standard residuals
+plot1 <- ggplot(dfstandardresidual, aes(x = standardresidual)) + 
+  geom_histogram(binwidth = 0.5, fill = "coral4") +
+  ggtitle("Histogram of Standard Residuals")
+
+# Plot a histogram of studentized residuals
+plot2 <- ggplot(dfstudentizedresidual, aes(x = studentizedresidual)) + 
+  geom_histogram(binwidth = 0.5, fill = "darkslateblue") +
+  ggtitle("Histogram of Studentized Residuals")
+
+# Scatter plot of standard residuals against their index
+plot3 <- ggplot(dfstandardresidual, aes(x = x, y = standardresidual)) + 
+  geom_point(color = "cornflowerblue") +
+  ggtitle("Standard Residuals vs Index")
+
+# Scatter plot of studentized residuals against their index
+plot4 <- ggplot(dfstudentizedresidual, aes(x = x, y = studentizedresidual)) + 
+  geom_point(color = "brown3") +
+  ggtitle("Studentized Residuals vs Index")
+
+# Arrange the plots in a 2x2 grid
+grid.arrange(plot1, plot2, plot3, plot4, nrow = 2, ncol = 2)
+
+```
+
+**Interpretation:**
+
+Standardized residuals standardize the residuals by dividing each
+residual by its estimated standard deviation that is normally
+distributed and adjusting its standard deviation to 1. Standardized
+residuals close to 0 indicate that the observed values are close to what
+is predicted by the model, while values far from 0 indicate potential
+outliers or points where the model may not fit well.
+
+While studentized residuals standardize the residual by dividing each
+residual by an estimate of its standard deviation that takes into
+account the influence (leverage) of each observation on the model fit.
+
+They are typically used for assessing the overall fit of the model and
+identifying outliers.
+
+It may be inferred that the **residuals are normally distributed in
+general** from the histograms of the studentized and standardised
+residuals, which exhibit normal distribution. This is a positive
+indicator as it indicates that one of the **fundamental requirements of
+linear regression (normally distributed residuals) has been met**. Model
+6 appears to be accurately representing the relationship between the
+predictors and the response variable, based on the residuals' normality.
+
+However, some residuals on the right-hand side of the histogram seem to
+be the outliers as they separate distinctly from the other values. The
+presence of outliers is further supported by the scatterplots of the
+standardised and studentized residuals, which reveal that most dots fall
+between the intervals of -2 and 2, with only 4 dots falling outside of
+it.
+
+<br>
+
+# Diagnostic Plots
+
+```{r}
+
+# Set up a 2x2 plotting area and create diagnostic plots for the best_model
+par(mfrow = c(2, 2))
+plot(best_model)
+
+```
+
+Four diagnostic plots are generated for model 6 to assess the quality
+and assumptions of the regression model.
+
+**Residuals vs Fitted:**
+
+-   This graph checks the linearity assumption and identifies non-linear
+    patterns. There appears to be a **slight trend in the residuals**,
+    suggesting potential non-linearity or that some predictor variables
+    might be missing from the model.
+
+**Normal Q-Q:**
+
+-   This graph checks if the residuals are normally distributed. In the
+    plot, the points mostly lie along the 45-degree line, suggesting the
+    residuals are **approximately normally distributed**, although there
+    are **some deviations at the tails**.
+
+**Scale-Location (Spread-Location):**
+
+-   This graph checks the homoscedasticity assumption, that is the
+    constant variance of residuals. In the plot, the **residuals are
+    spread fairly constant across the fitted values**, the red line is
+    also relatively horizontal, though there is some indication of
+    increasing variance with higher fitted values.
+
+**Residuals vs Leverage:**
+
+-   This graph identifies influential data points that have a high
+    leverage or high residual. In the plot, **most points lie within
+    Cook's distance lines**, but there are some potentially influential
+    points, but they do not have an excessive influence on the model,
+    none seem overly problematic.
+
+<br>
+
+# Confidence level
+
+The 95% confidence intervals for each coefficient in model 6 is
+calculated.
+
+```{r}
+
+# Calculate confidence intervals for the coefficients of the best_model
+confint(best_model)
+
+```
+
+The **intercept term is statistically significant**, suggesting that the
+baseline price of a mobile phone (when all other variables are zero)
+falls within this range. **For the other variables excluding front
+camera, the absence of zero within these intervals indicates the
+statistical significance of the corresponding coefficients.** The
+coefficient of screen size and thickness falls within the negative
+range, indicating these two variables are negatively correlated to the
+mobile phone price. On the other hand, the coefficient of the remaining
+variables falls within the positive range, indicating the variables are
+positively correlated to the mobile phone price. **As the confidence
+interval of the front camera ranges from -2.14 to 16.90, which includes
+zero, it suggests that the effect of the front camera on price is not
+statistically significant at the 95% confidence level.**
+
+<br>
+
+# ANOVA
+
+```{r}
+
+# Perform ANOVA analysis on the best_model to assess the significance of predictors
+anova(best_model)
+
+```
+
+Analysis of variance (ANOVA) is performed on model 6 to assess the
+significance of each predictor in the regression model. **Overall, the
+variables in the model are statistically significant predictors of
+mobile phone price, with the exception of the front camera, which is not
+significant**. However, the significance of the variables can be further
+interpreted by assessing the Pr(\>F) values. Pr(\>F) values less than
+0.05 are considered statistically significant at the 5% significance
+level. ScreenSize, PPI, CPU_core, InternalMem, RAM, Thickness, CPU_freq
+and Battery all have Pr(\>F) values less than 0.05, indicating they are
+highly significant predictors. On the other hand, **FrontCam has a
+Pr(\>F) value approximately 0.15, indicating that the front camera does
+not significantly affect phone pricing at the 5% significance level.**
+
+<br>
+
+# Conclusion
+
+**Topic Overview and Data Description**
+
+The primary focus of this study is to explore the mobile phone market,
+particularly how various features influence the pricing of mobile
+phones. We utilised a comprehensive dataset from Kaggle, which includes
+diverse specifications such as weight, thickness, battery capacity,
+screen resolution, pixels per inch (PPI), camera features, CPU
+specifications, internal memory, and RAM. These variables form the
+backbone of our analysis, helping us understand which factors consumers
+value most when it comes to mobile phone pricing.
+
+**Model Setup and Analysis**
+
+To effectively address the project's objectives, multiple regression
+models were designed to identify the variables that most significantly
+impact mobile phone pricing. In total, we constructed six distinct
+models, each incorporating various combinations of the aforementioned
+features. These models were rigorously analysed to discern how well they
+explained the variability in mobile phone prices.
+
+**Model Selection Key Points and Best Model Determination**
+
+The selection of the best model was based on several statistical
+criteria:
+
+-   **R-Squared and Adjusted R-Squared:** These metrics showed that
+    Models 5 and 6 closely followed the Full Model in terms of
+    explanatory power, indicating robust model performance.
+-   **Mallows' Cp:** Among the models, Model 6 demonstrated a lower Cp
+    value, suggesting it has a good balance between accuracy and
+    simplicity.
+-   **Number of Predictors and AICc:** Model 6, with fewer predictors
+    and the lowest AICc, provided an optimal balance, reducing
+    complexity while maintaining a high level of explanatory power.
+
+Based on these criteria, Model 6 emerged as the best model. It
+effectively captured the relationship between mobile phone features and
+pricing with sufficient complexity to avoid overfitting.
+
+**Significant Predictors and Their Implications**
+
+The best model highlighted several significant predictors of mobile
+phone pricing as they directly relate to the performance and user
+experience of a mobile phone. According to Maesya et al. (2023), RAM,
+number of CPU cores, CPU frequency, PPI, internal memory and battery
+have significantly positive impacts on the price of mobile phones, which
+also has been evident by several other studies (Listianingrum et al.,
+2021; Ahmad et al., 2019). The positive relationship between these
+variables and price indicates that consumers are willing to pay more for
+higher performance and better display quality. Moreover, it is also
+revealed that screen size and thickness significantly negatively impacts
+mobile prices. On the other hand, studies have also indicated that
+although camera quality can affect consumers' decisions, the front
+camera in particular does not have as much of an impact on the final
+price as other features do (Maesya et al., 2023; Listianingrum et al.,
+2021).
+
+**Implications for Mobile Phone Companies**
+
+The findings from this study provide actionable insights for mobile
+phone companies. By understanding the features that significantly affect
+pricing, companies can strategically design their products to align with
+consumer preferences. For instance, investing in advanced display
+technology and higher memory capacities can justify higher price points
+and cater to consumer demand for more powerful devices. Moreover, the
+preference for sleeker designs, as indicated by the negative correlation
+with thickness, suggests that slimmer phones could be marketed as
+premium offerings.
+
+In conclusion, this analysis not only aids in setting competitive
+pricing strategies but also guides product development by highlighting
+the features that are most valued by consumers in different market
+segments. By tailoring products according to these insights, mobile
+phone companies can better meet consumer expectations and enhance their
+market position and also attain a goal of maximising profit.
